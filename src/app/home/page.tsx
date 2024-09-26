@@ -31,14 +31,17 @@ interface Orgao {
 }
 
 interface Material {
-  material: any
-  descricao: string;
-  codigo: number;
-  idGrupo: string;
-  idClasse: string;
-  idPdm: string;
-  status: boolean;
-  sustentavel: boolean;
+  codigoGrupo: number;
+  nomeGrupo: string;
+  codigoClasse: number;
+  nomeClasse: string;
+  codigoPdm: number;
+  nomePdm: string;
+  codigoItem: number;
+  descricaoItem: string;
+  statusItem: boolean;
+  itemSustentavel: boolean;
+  dataHoraAtualizacao: string;
 }
 
 export default function HomePage() {
@@ -61,19 +64,19 @@ export default function HomePage() {
     }
   }, [isOrgaoLoading, isMateriaisLoading, toast])
   
-  
   const renderMaterial = (material: Material) => (
     <Card className="mb-4">
       <CardHeader>
-        <CardTitle>Material: {material.descricao}</CardTitle>
+        <CardTitle>Material: {material.descricaoItem}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p><strong>Código:</strong> {material.codigo}</p>
-        <p><strong>ID Grupo:</strong> {material.idGrupo}</p>
-        <p><strong>ID Classe:</strong> {material.idClasse}</p>
-        <p><strong>ID PDM:</strong> {material.idPdm}</p>
-        <p><strong>Status:</strong> {material.status ? 'Ativo' : 'Inativo'}</p>
-        <p><strong>Sustentável:</strong> {material.sustentavel ? 'Sim' : 'Não'}</p>
+        <p><strong>CATMAT:</strong> {material.codigoItem}</p>
+        <p><strong>Nome do Grupo:</strong> {material.nomeGrupo}</p>
+        <p><strong>Código da Classe:</strong> {material.codigoClasse}</p>
+        <p><strong>Nome do PDM:</strong> {material.nomePdm}</p>
+        <p><strong>Status:</strong> {material.statusItem ? 'Ativo' : 'Inativo'}</p>
+        <p><strong>Sustentável:</strong> {material.itemSustentavel ? 'Sim' : 'Não'}</p>
+        <p><strong>Data de Atualização deste material:</strong> {new Date(material.dataHoraAtualizacao).toLocaleString()}</p>
       </CardContent>
     </Card>
   )
@@ -199,22 +202,7 @@ export default function HomePage() {
               <p className="mb-4 text-muted-foreground">Acesse e gere relatórios detalhados sobre suas compras.</p>
             </CardContent>
             <CardFooter>
-              <Button variant="default" className="w-full">Gerar Relatórios</Button>
-            </CardFooter>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-2xl">
-                <Settings className="h-8 w-8 mr-3 text-primary" />
-                Configurações
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground">Ajuste as configurações de sua conta e preferências.</p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="default" className="w-full">Configurar</Button>
+              <Button variant="default" className="w-full">Gerar Relatório</Button>
             </CardFooter>
           </Card>
         </section>
