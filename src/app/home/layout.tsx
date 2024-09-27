@@ -2,6 +2,7 @@ import Image from "next/image";
 import Background from "../../../public/assets/fundo.png";
 import React from "react";
 import NavBar from "@/components/NavBar";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function HomeLayout({
   children,
@@ -11,6 +12,8 @@ export default function HomeLayout({
   return (
     <div className="relative h-screen w-screen overflow-hidden">
       {/* Background */}
+      <Toaster />
+
       <Image
         src={Background}
         alt="Background do site SEDUR (imagem abstrata)"

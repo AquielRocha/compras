@@ -1,97 +1,109 @@
-// src/components/PdfReport.tsx
-import React from 'react';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+// import jsPDF from "jspdf";
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    padding: 20,
-    fontSize: 12,
-    fontFamily: 'Helvetica',
-  },
-  section: {
-    marginBottom: 10,
-  },
-  header: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-});
 
-interface UASG {
-  id: string;
-  nome: string;
-  idOrgaoSuperior: string;
-  cep: string;
-}
+// export default const Baixarpdf = () => {
+//     const doc = new jsPDF();
 
-interface Orgao {
-  orgao: {
-    nome: string;
-    codigo: string;
-    codigoTipoAdm: string;
-    codigoTipoEsfera: string;
-    ativo: boolean;
-  };
-  uasgs: UASG[];
-}
+//     // Definir margens e configurar estilo geral
+//     const marginLeft = 20;
+//     const marginTop = 20;
+//     let currentY = marginTop;
 
-interface Material {
-  codigoGrupo: number;
-  nomeGrupo: string;
-  codigoClasse: number;
-  nomeClasse: string;
-  codigoPdm: number;
-  nomePdm: string;
-  codigoItem: number;
-  descricaoItem: string;
-  statusItem: boolean;
-  itemSustentavel: boolean;
-  dataHoraAtualizacao: string;
-}
+//     // Configurar fonte e tamanho para título
+//     doc.setFontSize(18);
+//     doc.text("Relatório de Compras", marginLeft, currentY);
+//     currentY += 10; // Espaçamento
 
-interface PdfReportProps {
-  materiais: Material[];
-  orgao: Orgao | null; // Permitir que 'orgao' seja nulo
-}
+//     // Adicionar data e hora de geração
+//     const date = new Date().toLocaleString();
+//     doc.setFontSize(12);
+//     doc.text(`Gerado em: ${date}`, marginLeft, currentY);
+//     currentY += 10;
 
-const PdfReport: React.FC<PdfReportProps> = ({ materiais, orgao }) => {
-  return (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.header}>Relatório de Materiais</Text>
-        
-        {/* Verifique se o órgão está disponível */}
-        {orgao ? (
-          <>
-            <Text>Órgão: {orgao.orgao.nome}</Text>
-            <Text>Código: {orgao.orgao.codigo}</Text>
-            <Text>Tipo Administração: {orgao.orgao.codigoTipoAdm}</Text>
-          </>
-        ) : (
-          <Text>Órgão não disponível</Text>
-        )}
+//     // Se houver dados do órgão, criar uma seção específica para isso
+//     if (orgaoData) {
+//       doc.setFontSize(16);
+//       doc.text("Informações do Órgão", marginLeft, currentY);
+//       currentY += 8;
 
-        <View style={styles.section}>
-          <Text style={styles.header}>Materiais</Text>
-          {materiais.length > 0 ? (
-            materiais.map((material) => (
-              <View key={material.codigoItem}>
-                <Text><strong>Material:</strong> {material.descricaoItem}</Text>
-                <Text><strong>CATMAT:</strong> {material.codigoItem}</Text>
-                <Text><strong>Grupo:</strong> {material.nomeGrupo}</Text>
-                <Text><strong>Status:</strong> {material.statusItem ? 'Ativo' : 'Inativo'}</Text>
-                <Text><strong>Data de Atualização:</strong> {new Date(material.dataHoraAtualizacao).toLocaleString()}</Text>
-                <Text>--------------------------------</Text>
-              </View>
-            ))
-          ) : (
-            <Text>Nenhum material encontrado.</Text>
-          )}
-        </View>
-      </Page>
-    </Document>
-  );
-};
+//       doc.setFontSize(12);
+//       doc.text(`Nome: ${orgaoData.orgao.nome}`, marginLeft, currentY);
+//       currentY += 6;
+//       doc.text(`Código: ${orgaoData.orgao.codigo}`, marginLeft, currentY);
+//       currentY += 6;
+//       doc.text(
+//         `Tipo de Administração: ${orgaoData.orgao.codigoTipoAdm}`,
+//         marginLeft,
+//         currentY
+//       );
+//       currentY += 6;
+//       doc.text(
+//         `Tipo de Esfera: ${orgaoData.orgao.codigoTipoEsfera}`,
+//         marginLeft,
+//         currentY
+//       );
+//       currentY += 6;
+//       doc.text(
+//         `Ativo: ${orgaoData.orgao.ativo ? "Sim" : "Não"}`,
+//         marginLeft,
+//         currentY
+//       );
+//       currentY += 10; // Espaçamento adicional após essa seção
+//     }
+//     // Se houver dados dos materiais, criar outra seção
+//     if (Array.isArray(materiaisData)) {
+//       // Verifica se materiaisData é uma array
+//       doc.setFontSize(16);
+//       doc.text("Informações dos Materiais", marginLeft, currentY);
+//       currentY += 8;
 
-export default PdfReport;
+//       // Adicionar informações de cada material
+//       materiaisData.forEach((material: any, index: any) => {
+//         doc.setFontSize(12);
+//         doc.text(
+//           `${index + 1}. Nome do Material: ${material.descricaoItem}`,
+//           marginLeft,
+//           currentY
+//         );
+//         currentY += 6;
+//         doc.text(`   CATMAT: ${material.codigoItem}`, marginLeft, currentY);
+//         currentY += 6;
+//         doc.text(`   Grupo: ${material.nomeGrupo}`, marginLeft, currentY);
+//         currentY += 6;
+//         doc.text(`   Classe: ${material.nomeClasse}`, marginLeft, currentY);
+//         currentY += 6;
+//         doc.text(`   PDM: ${material.nomePdm}`, marginLeft, currentY);
+//         currentY += 6;
+//         doc.text(
+//           `   Sustentável: ${material.itemSustentavel ? "Sim" : "Não"}`,
+//           marginLeft,
+//           currentY
+//         );
+//         currentY += 6;
+//         doc.text(
+//           `   Data de Atualização: ${new Date(material.dataHoraAtualizacao).toLocaleString()}`,
+//           marginLeft,
+//           currentY
+//         );
+//         currentY += 10; // Espaçamento entre materiais
+//       });
+//     } else {
+//       doc.setFontSize(12);
+//       doc.text("Nenhum material encontrado.", marginLeft, currentY);
+//       currentY += 10;
+//     }
+
+//     const totalPages = (doc.internal as any).getNumberOfPages();
+//     for (let i = 1; i <= totalPages; i++) {
+//       doc.setPage(i);
+//       doc.setFontSize(10);
+//       doc.text(
+//         `Página ${i} de ${totalPages}`,
+//         doc.internal.pageSize.getWidth() - 30,
+//         doc.internal.pageSize.getHeight() - 10
+//       );
+//     }
+
+//     // Salvar o PDF
+//     doc.save("relatorio_compras.pdf");
+//   };

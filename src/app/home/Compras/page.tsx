@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import NavBar from "@/components/NavBar";
-import { BarChart3, FileText, Settings } from "lucide-react";
+import { BarChart3 } from "lucide-react"; // Removed unused imports (FileText, Settings)
 import { useQueryGetOrgaoById } from "@/hooks/Compras/useQueryGetById";
 import { useQueryGetMateriaisById } from "@/hooks/Materiais/UseQueryGetById";
 import {
@@ -63,13 +63,15 @@ export default function Compras() {
   const [materialId, setMaterialId] = useState<string>("");
   const [selectedUasg, setSelectedUasg] = useState<UASG | null>(null);
   const [mediaPreco, setMediaPreco] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); // estado para controlar o modal
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const { toast } = useToast();
 
   const {
     data: orgaoData,
     isLoading: isOrgaoLoading,
     error: orgaoError,
   } = useQueryGetOrgaoById(orgaoId);
+
   const {
     data: materiaisData,
     isLoading: isMateriaisLoading,
@@ -82,21 +84,33 @@ export default function Compras() {
     error: precoError,
   } = useQueryGetPrecoById(materialId);
 
+  const [arrayDePrecos, setArrayDePrecos] = useState<number[]>([]); // Novo estado para armazenar preços
+
   useEffect(() => {
     if (precoData && Array.isArray(precoData)) {
-      const media = calcularMediaPreco(precoData);
+      const precos = precoData.map((item: any) => item.precoUnitario); // Extrai os preços
+      setArrayDePrecos(precos);
+      const media = calcularMediaPreco(precos);
       setMediaPreco(media);
     }
   }, [precoData]);
 
-  const calcularMediaPreco = (precos:any) => {
-    const totalPreco = precos.reduce((acc:any, item:any) => acc + item.precoUnitario, 0);
-    return totalPreco / precos.length;
+  const calcularMediaPreco = (precos: number[]) => {
+    const totalPreco = precos.reduce((acc: number, item: number) => acc + item, 0);
+    return precos.length ? totalPreco / precos.length : null; // Evita divisão por zero
   };
 
-
-
- 
+  const handleConsultarPreco = () => {
+    if (mediaPreco !== null) {
+      setIsModalOpen(true);
+    } else {
+      toast({
+        title: "Aviso",
+        description: "Média de preço ainda não calculada Aguarde!!.",
+        variant: "destructive", // Choose an appropriate variant for the toast
+      });
+    }
+  };
 
   const renderMaterial = (material: Material) => (
     <Card className="mb-4">
@@ -117,31 +131,17 @@ export default function Compras() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <p><strong>CATMAT:</strong> {material.codigoItem}</p>
+        <p><strong>Nome do Grupo:</strong> {material.nomeGrupo}</p>
+        <p><strong>Código da Classe:</strong> {material.codigoClasse}</p>
+        <p><strong>Nome do PDM:</strong> {material.nomePdm}</p>
+        <p><strong>Status:</strong> {material.statusItem ? "Ativo" : "Inativo"}</p>
+        <p><strong>Sustentável:</strong> {material.itemSustentavel ? "Sim" : "Não"}</p>
         <p>
-          <strong>CATMAT:</strong> {material.codigoItem}
-        </p>
-        <p>
-          <strong>Nome do Grupo:</strong> {material.nomeGrupo}
-        </p>
-        <p>
-          <strong>Código da Classe:</strong> {material.codigoClasse}
-        </p>
-        <p>
-          <strong>Nome do PDM:</strong> {material.nomePdm}
-        </p>
-        <p>
-          <strong>Status:</strong> {material.statusItem ? "Ativo" : "Inativo"}
-        </p>
-        <p>
-          <strong>Sustentável:</strong>{" "}
-          {material.itemSustentavel ? "Sim" : "Não"}
-        </p>
-        <p>
-          <strong>Data de Atualização deste material:</strong>{" "}
-          {new Date(material.dataHoraAtualizacao).toLocaleString()}
+          <strong>Data de Atualização deste material:</strong> {new Date(material.dataHoraAtualizacao).toLocaleString()}
         </p>
 
-        <Button className="mt-4" onClick={() => setIsModalOpen(true)}>
+        <Button className="mt-4" onClick={handleConsultarPreco}>
           Consultar Preço
         </Button>
       </CardContent>
@@ -154,18 +154,10 @@ export default function Compras() {
         <CardTitle>Órgão: {orgao.orgao.nome}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>
-          <strong>Código:</strong> {orgao.orgao.codigo}
-        </p>
-        <p>
-          <strong>Tipo Administração:</strong> {orgao.orgao.codigoTipoAdm}
-        </p>
-        <p>
-          <strong>Tipo Esfera:</strong> {orgao.orgao.codigoTipoEsfera}
-        </p>
-        <p>
-          <strong>Ativo:</strong> {orgao.orgao.ativo ? "Sim" : "Não"}
-        </p>
+        <p><strong>Código:</strong> {orgao.orgao.codigo}</p>
+        <p><strong>Tipo Administração:</strong> {orgao.orgao.codigoTipoAdm}</p>
+        <p><strong>Tipo Esfera:</strong> {orgao.orgao.codigoTipoEsfera}</p>
+        <p><strong>Ativo:</strong> {orgao.orgao.ativo ? "Sim" : "Não"}</p>
 
         <h3 className="text-xl font-semibold mt-4">
           Unidades Administrativas de Serviços Gerais (UASGs):
@@ -190,18 +182,10 @@ export default function Compras() {
 
         {selectedUasg && (
           <div className="mt-4">
-            <p>
-              <strong>Nome:</strong> {selectedUasg.nome}
-            </p>
-            <p>
-              <strong>Código da Unidade:</strong> {selectedUasg.id}
-            </p>
-            <p>
-              <strong>Órgão Superior:</strong> {selectedUasg.idOrgaoSuperior}
-            </p>
-            <p>
-              <strong>CEP:</strong> {selectedUasg.cep}
-            </p>
+            <p><strong>Nome:</strong> {selectedUasg.nome}</p>
+            <p><strong>Código da Unidade:</strong> {selectedUasg.id}</p>
+            <p><strong>Órgão Superior:</strong> {selectedUasg.idOrgaoSuperior}</p>
+            <p><strong>CEP:</strong> {selectedUasg.cep}</p>
           </div>
         )}
       </CardContent>
@@ -220,11 +204,13 @@ export default function Compras() {
             transparente.
           </p>
         </section>
+        
         <PriceModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        averagePrice={mediaPreco}
-      />
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          prices={arrayDePrecos} // Passando o array de preços
+        />
+
         <Card className="mb-12">
           <CardContent className="pt-6">
             <div className="space-y-4">
@@ -270,21 +256,6 @@ export default function Compras() {
         </Card>
 
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-2xl">
-                <FileText className="h-8 w-8 mr-3 text-primary" />
-                Processos em Andamento
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground">Acompanhe e gerencie todos os processos ativos.</p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="default" className="w-full">Ver Processos</Button>
-            </CardFooter>
-          </Card> */}
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-2xl">
@@ -298,7 +269,7 @@ export default function Compras() {
               </p>
             </CardContent>
             <CardFooter>
-              <Button variant="default"  className="w-full">
+              <Button variant="default" className="w-full">
                 Gerar Relatório
               </Button>
             </CardFooter>
