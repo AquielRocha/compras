@@ -9,7 +9,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { deleteCookie, getCookie } from "cookies-next";
-import { Menu, X, LogOut, LaptopMinimal, Home, BarChart2 } from "lucide-react";
+import { Menu, X, LogOut, LaptopMinimal, Home, BarChart2, Settings, User, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -51,27 +51,51 @@ const NavBar = () => {
               </Button>
             </div>
           </DrawerHeader>
-
           <div className="py-4">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="home">
-                <AccordionTrigger className="py-2 px-4 hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home"); }}>
-                    <Home className="mr-2 h-5 w-5" />
-                    <span>Home</span>
-                  </div>
-                </AccordionTrigger>
-              </AccordionItem>
-              <AccordionItem value="reports">
-                <AccordionTrigger className="py-2 px-4 hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/reports"); }}>
-                    <BarChart2 className="mr-2 h-5 w-5" />
-                    <span>Relatórios</span>
-                  </div>
-                </AccordionTrigger>
-              </AccordionItem>
-            </Accordion>
+  <Accordion type="single" collapsible className="w-full">
+    <div className="py-2 px-4 hover:bg-gray-100 transition-colors">
+      <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home"); }}>
+        <Home className="mr-2 h-5 w-5" />
+        <span>Home</span>
+      </div>
+    </div>
+
+    <AccordionItem value="reports">
+      <div className="py-2 px-4 hover:bg-gray-100 transition-colors">
+        <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home/Compras"); }}>
+          <BarChart2 className="mr-2 h-5 w-5" />
+          <span>Relação de Bens</span>
+        </div>
+      </div>
+    </AccordionItem>
+
+    <AccordionItem value="settings">
+      <AccordionTrigger className="py-3 px-4 hover:bg-gray-100 transition-colors">
+        <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home/Settings"); }}>
+          <Settings className="mr-2 h-5 w-5" />
+          <span>Configurações</span>
+        </div>
+      </AccordionTrigger>
+
+      {/* Sub-itens dentro do acordeão de Configurações */}
+      <AccordionContent>
+        <div className="py-2 px-4 hover:bg-gray-100 transition-colors">
+          <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home/Profile"); }}>
+            <User className="mr-2 h-5 w-5" />
+            <span>Perfil</span>
           </div>
+        </div>
+        <div className="py-2 px-4 hover:bg-gray-100 transition-colors">
+          <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home/Help"); }}>
+            <HelpCircle className="mr-2 h-5 w-5" />
+            <span>Ajuda</span>
+          </div>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  </Accordion>
+</div>
+
 
           <DrawerFooter className="p-4 border-t">
             {Number.parseInt(decodedCookie) === 12 && (
