@@ -141,7 +141,7 @@ export default function Compras() {
           <strong>Data de Atualização deste material:</strong> {new Date(material.dataHoraAtualizacao).toLocaleString()}
         </p>
 
-        <Button className="mt-4" onClick={handleConsultarPreco}>
+        <Button className="mt-4 bg-[var(--icmbio-green)] text-white hover:bg-green-700" onClick={handleConsultarPreco}>
           Consultar Preço
         </Button>
       </CardContent>
@@ -193,7 +193,7 @@ export default function Compras() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background"  style={{'--icmbio-green': '#00823B'} as React.CSSProperties}>
       <main className="flex-grow container mx-auto px-4 py-8">
         <section className="mb-12 text-center">
           <h1 className="text-4xl font-bold mb-4 text-primary">
@@ -269,8 +269,8 @@ export default function Compras() {
               </p>
             </CardContent>
             <CardFooter>
-              <Button variant="default" className="w-full">
-                Gerar Relatório
+            <Button type="submit" className="bg-[var(--icmbio-green)] text-white hover:bg-green-700">
+            Gerar Relatório
               </Button>
             </CardFooter>
           </Card>

@@ -71,7 +71,7 @@ const NavBar = () => {
 
     <AccordionItem value="settings">
       <AccordionTrigger className="py-3 px-4 hover:bg-gray-100 transition-colors">
-        <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home/Settings"); }}>
+        <div className="flex items-center" onClick={() => { setIsDrawerOpen(false); redirect("/home/Config"); }}>
           <Settings className="mr-2 h-5 w-5" />
           <span>Configurações</span>
         </div>
