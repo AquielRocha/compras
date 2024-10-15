@@ -5,11 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import MateriaisTab from "./components/material"
 import ServicosTab from "./components/servico"
+import { Toaster } from "@/components/ui/toaster"
 
 export default function Component() {
   const [activeTab, setActiveTab] = useState("materiais")
 
   return (
+    
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-grow container mx-auto px-4 py-8">
  

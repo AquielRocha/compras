@@ -5,7 +5,7 @@ import { useState } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ContextWrapper } from "@/contexts/ContextWrapper"; // Ajuste o caminho conforme necessário
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

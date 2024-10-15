@@ -11,8 +11,10 @@ import { useQueryGetAllMateriais } from "@/hooks/Materiais/useQueryGetAllMateria
 import { DataTable } from "./DataTableMt"
 
 interface Materiais {
-  codigo_item: number
-  nome_item: string
+  codigo_item: number;
+  nome_item: string;
+  codigo_grupo: number;
+  descricao_item: string;
 }
 
 export default function MateriaisTab() {

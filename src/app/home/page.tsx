@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import NavBar from "@/components/NavBar";
 import { BarChart3, FileText, Settings } from "lucide-react";
 import { useQueryGetOrgaoById } from "@/hooks/Orgao/useQueryGetById";
-import { useQueryGetMateriaisById } from "@/hooks/Materiais/useQueryGetAllMateriais";
 import {
   Select,
   SelectTrigger,
