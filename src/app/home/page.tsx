@@ -27,7 +27,6 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background">
       <div className="flex flex-col items-center justify-center flex-1">
         <h1 className="text-6xl font-bold text-primary">Página Inicial</h1>
-        <p className="text-lg text-gray-500">Aqui vai um  DashBoard</p>
       </div>
     </div>
   );

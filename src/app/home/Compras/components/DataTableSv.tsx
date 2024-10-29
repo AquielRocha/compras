@@ -24,11 +24,16 @@ import {
   Info,
 } from "lucide-react";
 import { toast } from "sonner";
+import Modal from "./ModalPreco";
 
 interface Servicos {
   codigo: number;
-  descricao: string;
-  codigo_grupo: number;
+  descricao: string | null;
+  codigo_grupo: number | null;
+  cpc: number;
+  codigo_secao: number;
+  codigo_divisao: number;
+  codigo_classe: number | null;
 }
 
 export const DataTable = ({ data }: { data: Servicos[] }) => {
@@ -41,13 +46,6 @@ export const DataTable = ({ data }: { data: Servicos[] }) => {
   const currentData = data.slice(startIndex, endIndex);
 
   const handlePdfClick = () => {
-    toast.info("Funcionalidade em desenvolvimento", {
-      description: "A visualização de PDF estará disponível em breve.",
-      duration: 3000,
-      closeButton: true,
-    });
-  };
-  const handleBuy = () => {
     toast.info("Funcionalidade em desenvolvimento", {
       description: "A visualização de PDF estará disponível em breve.",
       duration: 3000,
@@ -84,7 +82,9 @@ export const DataTable = ({ data }: { data: Servicos[] }) => {
                 <TableCell className="text-gray-700">
                   <TooltipProvider>
                     <Tooltip>
-                      {item.descricao}
+                      <TooltipTrigger >
+                        {item.descricao}
+                      </TooltipTrigger>
                       <TooltipContent side="bottom">
                         <div className="max-w-xs flex items-center">
                           <Info className="mr-2 h-4 w-4 text-gray-500" />
@@ -116,18 +116,67 @@ export const DataTable = ({ data }: { data: Servicos[] }) => {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={handleBuy}
-
-                          >
-                            <DollarSign className="h-4 w-4 text-gray-500" />
-                          </Button>
+                          <div>
+                            <Modal
+                              trigger={
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <DollarSign className="h-4 w-4 text-gray-500" />
+                                </Button>
+                              }
+                              title="Detalhes e Preço"
+                              description="Serviço:"
+                            >
+                              <div className="space-y-2">
+                                <div>
+                                  <strong>Código: </strong>
+                                  <span>{item.codigo}</span>
+                                </div>
+                                <div>
+                                  <strong>Descrição: </strong>
+                                  <span>{item.descricao}</span>
+                                </div>
+                                <div>
+                                  <strong>Grupo: </strong>
+                                  <span>{item.codigo_grupo}</span>
+                                </div>
+                                <div>
+                                  <strong>CPC: </strong>
+                                  <span>{item.cpc}</span>
+                                </div>
+                                <div>
+                                  <strong>Seção: </strong>
+                                  <span>{item.codigo_secao}</span>
+                                </div>
+                                <div>
+                                  <strong>Divisão: </strong>
+                                  <span>{item.codigo_divisao}</span>
+                                </div>
+                                <div>
+                                  <strong>Classe: </strong>
+                                  <span>{item.codigo_classe}</span>
+                                </div>
+                                <div className="text-xs text-gray-500 mt-2">
+                                  Informações retiradas do:{" "}
+                                  <a
+                                    href="https://compras.dados.gov.br/docs/home.html"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline"
+                                  >
+                                    Portal de Compras do Governo Federal
+                                  </a>
+                                </div>
+                              </div>
+                            </Modal>
+                          </div>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Ver Preço</p>
