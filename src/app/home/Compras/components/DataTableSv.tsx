@@ -1,6 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Table,
   TableBody,
@@ -16,13 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  DollarSign,
-  Info,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import Modal from "./ModalPreco";
 
@@ -37,13 +37,32 @@ interface Servicos {
 }
 
 export const DataTable = ({ data }: { data: Servicos[] }) => {
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const groupedData = useMemo(() => {
+    return data.reduce((acc, item) => {
+      const description = item.descricao || "Sem Descrição";
+      if (!acc[description]) {
+        acc[description] = [];
+      }
+      acc[description].push(item);
+      return acc;
+    }, {} as Record<string, Servicos[]>);
+  }, [data]);
+
+  const sortedDescriptions = useMemo(() => {
+    return Object.keys(groupedData).sort((a, b) => {
+      if (a === "Sem Descrição") return 1;
+      if (b === "Sem Descrição") return -1;
+      return a.localeCompare(b);
+    });
+  }, [groupedData]);
+
+  const totalPages = Math.ceil(sortedDescriptions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  const currentDescriptions = sortedDescriptions.slice(startIndex, endIndex);
 
   const handlePdfClick = () => {
     toast.info("Funcionalidade em desenvolvimento", {
@@ -54,149 +73,106 @@ export const DataTable = ({ data }: { data: Servicos[] }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border border-gray-200">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-gray-50">
-              <TableHead className="w-[100px] font-semibold text-gray-600">
-                CATSER
-              </TableHead>
-              <TableHead className="font-semibold text-gray-600">
-                Descrição do Serviço
-              </TableHead>
-              <TableHead className="font-semibold text-gray-600">
-                Grupo
-              </TableHead>
-              <TableHead className="text-right font-semibold text-gray-600">
-                Ações
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentData.map((item) => (
-              <TableRow key={item.codigo} className="hover:bg-gray-50">
-                <TableCell className="font-medium text-gray-700">
-                  {item.codigo}
-                </TableCell>
-                <TableCell className="text-gray-700">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger >
-                        {item.descricao}
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <div className="max-w-xs flex items-center">
-                          <Info className="mr-2 h-4 w-4 text-gray-500" />
-                          <span className="text-sm">{item.descricao}</span>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </TableCell>
-                <TableCell className="text-gray-700">
-                  {item.codigo_grupo}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={handlePdfClick}
-                          >
-                            <FileText className="h-4 w-4 text-gray-500" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Ver PDF</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div>
-                            <Modal
-                              trigger={
+    <div className="w-full p-6 space-y-4">
+      <Accordion type="single" collapsible>
+        {currentDescriptions.map((description) => (
+          <AccordionItem key={description} value={description}>
+            <AccordionTrigger className="bg-gray-50 px-4 py-2 text-gray-700 hover:bg-gray-100">
+              {description}
+            </AccordionTrigger>
+            <AccordionContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px] font-semibold text-gray-600">
+                      CATSER
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-600">
+                      Grupo
+                    </TableHead>
+                    <TableHead className="text-right font-semibold text-gray-600">
+                      Ações
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {groupedData[description].map((item) => (
+                    <TableRow key={item.codigo} className="hover:bg-gray-50">
+                      <TableCell className="font-medium text-gray-700">
+                        {item.codigo}
+                      </TableCell>
+                      <TableCell className="text-gray-700">
+                        {item.codigo_grupo}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 w-8 p-0"
+                                  onClick={handlePdfClick}
                                 >
-                                  <DollarSign className="h-4 w-4 text-gray-500" />
+                                  <FileText className="h-4 w-4 text-gray-500" />
                                 </Button>
-                              }
-                              title="Detalhes e Preço"
-                              description="Serviço:"
-                            >
-                              <div className="space-y-2">
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Ver PDF</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
                                 <div>
-                                  <strong>Código: </strong>
-                                  <span>{item.codigo}</span>
-                                </div>
-                                <div>
-                                  <strong>Descrição: </strong>
-                                  <span>{item.descricao}</span>
-                                </div>
-                                <div>
-                                  <strong>Grupo: </strong>
-                                  <span>{item.codigo_grupo}</span>
-                                </div>
-                                <div>
-                                  <strong>CPC: </strong>
-                                  <span>{item.cpc}</span>
-                                </div>
-                                <div>
-                                  <strong>Seção: </strong>
-                                  <span>{item.codigo_secao}</span>
-                                </div>
-                                <div>
-                                  <strong>Divisão: </strong>
-                                  <span>{item.codigo_divisao}</span>
-                                </div>
-                                <div>
-                                  <strong>Classe: </strong>
-                                  <span>{item.codigo_classe}</span>
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2">
-                                  Informações retiradas do:{" "}
-                                  <a
-                                    href="https://compras.dados.gov.br/docs/home.html"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="underline"
+                                  <Modal
+                                    trigger={
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-8 w-8 p-0"
+                                      >
+                                        <DollarSign className="h-4 w-4 text-gray-500" />
+                                      </Button>
+                                    }
+                                    title="Detalhes e Preço"
+                                    description="Serviço:"
                                   >
-                                    Portal de Compras do Governo Federal
-                                  </a>
+                                    <div className="space-y-2">
+                                      <strong>Código:</strong>{" "}
+                                      <span>{item.codigo}</span>
+                                      <strong>Descrição:</strong>{" "}
+                                      <span>{item.descricao}</span>
+                                      <strong>Grupo:</strong>{" "}
+                                      <span>{item.codigo_grupo}</span>
+                                    </div>
+                                  </Modal>
                                 </div>
-                              </div>
-                            </Modal>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Ver Preço</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Ver Preço</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
 
-      <div className="flex items-center justify-between text-sm text-gray-600">
+      <div className="flex justify-between text-sm text-gray-600">
         <p>
-          Exibindo {startIndex + 1} a {Math.min(endIndex, data.length)} de{" "}
-          {data.length} itens
+          Exibindo {startIndex + 1} a {Math.min(endIndex, sortedDescriptions.length)} de{" "}
+          {sortedDescriptions.length} Serviços
         </p>
-        <div className="flex items-center space-x-2">
+        <div className="flex space-x-2">
           <Button
             variant="outline"
             size="sm"
@@ -210,9 +186,7 @@ export const DataTable = ({ data }: { data: Servicos[] }) => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() =>
-              setCurrentPage(Math.min(totalPages, currentPage + 1))
-            }
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
             className="h-8 px-2 text-gray-600"
           >

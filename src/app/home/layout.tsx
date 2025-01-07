@@ -14,14 +14,14 @@ export default function HomeLayout({
       {/* Background */}
       <Toaster />
 
-      <Image
-        src={Background}
-        alt="Background do site SEDUR (imagem abstrata)"
-        layout="fill"
-        objectFit="cover" 
-        quality={100}
-        className="absolute inset-0 z-0"
-      />
+        <Image
+          src={Background}
+          alt="Background do site SEDUR (imagem abstrata)"
+          layout="fill"
+          objectFit="cover" 
+          quality={100}
+          className="absolute inset-0 z-0"
+        />
 
       {/* Overlay content */}
       <div className="relative h-full w-full flex p-3 z-10 justify-center">

@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import {
   Table,
   TableBody,
   TableCell,
@@ -10,21 +16,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  DollarSign,
-  Info,
-} from "lucide-react";
-import { toast } from "sonner";
-import Modal from "./ModalPreco";
+import { Input } from "@/components/ui/input";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 interface Materiais {
   codigo_item: number;
@@ -36,176 +32,143 @@ interface Materiais {
   data_hora_atualizacao: Date;
 }
 
+interface SelectedItem {
+  id: number;
+  nome: string;
+  quantidade: number;
+}
+
 export const DataTable = ({ data }: { data: Materiais[] }) => {
-  const itemsPerPage = 10;
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
-
-  const handlePdfClick = () => {
-    toast.info("Funcionalidade em desenvolvimento", {
-      description: "A visualização de PDF estará disponível em breve.",
-      duration: 3000,
-      closeButton: true,
+  const handleAddItem = (id: number, nome: string, quantidade: number) => {
+    setSelectedItems((prev) => {
+      const existingItem = prev.find((item) => item.id === id);
+      if (existingItem) {
+        return prev.map((item) =>
+          item.id === id ? { ...item, quantidade } : item
+        );
+      }
+      return [...prev, { id, nome, quantidade }];
     });
   };
-  const handleBuy = () => {
-    toast.info("Funcionalidade em desenvolvimento", {
-      description: "A visualização do preço estará disponível em breve.",
-      duration: 3000,
-      closeButton: true,
-    });
+
+  const handleGeneratePDF = () => {
+    const documentDefinition = {
+      content: [
+        { text: "Lista de Itens Selecionados", style: "header" },
+        {
+          table: {
+            headerRows: 1,
+            widths: ["auto", "*", "auto"],
+            body: [
+              ["ID", "Nome", "Quantidade"],
+              ...selectedItems.map((item) => [
+                item.id.toString(),
+                item.nome,
+                item.quantidade.toString(),
+              ]),
+            ],
+          },
+        },
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 0, 0, 10] as [number, number, number, number],
+        },
+      },
+    };
+
+    pdfMake.createPdf(documentDefinition).download("extratoInsumos.pdf");
   };
+
+  const filteredData = data.filter((item) => {
+    const normalizedSearch = searchTerm
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    const normalizedName = item.nome_item
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+    return (
+      item.codigo_item.toString().includes(normalizedSearch) ||
+      normalizedName.includes(normalizedSearch)
+    );
+  });
+
+  const groupedData = filteredData.reduce((acc, item) => {
+    if (!acc[item.nome_item]) {
+      acc[item.nome_item] = [];
+    }
+    acc[item.nome_item].push(item);
+    return acc;
+  }, {} as Record<string, Materiais[]>);
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px] font-semibold text-gray-600">
-                CATMAT
-              </TableHead>
-              <TableHead className="font-semibold text-gray-600">
-                Nome do Item
-              </TableHead>
-              <TableHead className="font-semibold text-gray-600">
-                Código do Grupo
-              </TableHead>
-              <TableHead className="text-right font-semibold text-gray-600">
-                Ações
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentData.map((item) => (
-              <TableRow key={item.codigo_item}>
-                <TableCell className="font-medium">
-                  {item.codigo_item}
-                </TableCell>
-                <TableCell>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger >
-                        {item.nome_item}
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <div className="max-w-xs">
-                          <Info className="inline-block mr-2" size={16} />
-                          <span>{item.descricao_item}</span>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </TableCell>
-                <TableCell>{item.codigo_grupo}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={handlePdfClick}
-                          >
-                            <FileText className="h-4 w-4 text-gray-500" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Ver PDF</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Modal
-                            trigger={
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                              >
-                                <DollarSign className="h-4 w-4 text-gray-500" />
-                              </Button>
-                            }
-                            title="Detalhes e Preço"
-                            description="Material:"
-                          >
-                            <div className="space-y-2">
-                          
-                              <strong>Codigo do Item: </strong>
-                              <span>{item.codigo_item}</span>
-                              </div>
-                            <div className="space-y-2">
-                              <div>
-                              <strong>Descrição: </strong>
-                              <span>{item.descricao_item}</span>
-                              </div>
-                              <div>
-                              <strong>Grupo: </strong>
-                              <span>{item.nome_grupo}</span>
-                              </div>
-                              <div>
-                              <strong>Classe: </strong>
-                              <span>{item.nome_classe}</span>
-                              </div>
-                                <div>
-                                <strong>Última Atualização: </strong>
-                                <span>{new Date(item.data_hora_atualizacao).toLocaleDateString('pt-BR')}</span>
-                                </div>
-                                <div className="text-xs text-gray-500 mt-2">
-                                Informações retiradas do: <a href="https://compras.dados.gov.br/docs/home.html" target="_blank" rel="noopener noreferrer" className="underline">Portal de Compras do Governo Federal</a>
-                                </div>
-                            </div>
-
-                          </Modal>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Ver Preço</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Exibindo {startIndex + 1} a {Math.min(endIndex, data.length)} de{" "}
-          {data.length} itens
-        </p>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setCurrentPage(Math.min(totalPages, currentPage + 1))
-            }
-            disabled={currentPage === totalPages}
-          >
-            Próximo
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+    <div className="w-full p-6">
+      <Accordion type="single" collapsible className="w-full">
+        {Object.entries(groupedData).map(([nome_item, items]) => (
+          <AccordionItem key={nome_item} value={nome_item} className="border-b">
+            <AccordionTrigger className="bg-gray-50 px-4 py-2 text-gray-700 hover:bg-gray-100">
+            <span >{nome_item}</span>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 pb-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px] font-bold">CATMAT</TableHead>
+                    <TableHead className="font-bold">Descrição do item</TableHead>
+                    <TableHead className="font-bold">Quantidade</TableHead>
+                    <TableHead className="text-right font-bold">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {items.map((item) => (
+                    <TableRow key={item.codigo_item} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">{item.codigo_item}</TableCell>
+                      <TableCell>{item.descricao_item}</TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min={1}
+                          onChange={(e) =>
+                            handleAddItem(
+                              item.codigo_item,
+                              item.nome_item,
+                              parseInt(e.target.value, 10) || 0
+                            )
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleAddItem(item.codigo_item, item.nome_item, 1)
+                          }
+                        >
+                          Adicionar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+      <div className="flex justify-end border-t p-4">
+        <Button variant="default" onClick={handleGeneratePDF}>
+          Gerar PDF
+        </Button>
       </div>
     </div>
   );
