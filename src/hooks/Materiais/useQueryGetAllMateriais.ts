@@ -2,34 +2,53 @@ import api from "@/api/axios";
 import { useQuery } from "@tanstack/react-query";
 
 interface Materiais {
-  codigo: number;
+  id: number;
   codigo_item: number;
   nome_item: string;
-  
+  descricao_item: string;
+  codigo_grupo: number;
+  nome_grupo: string;
+  nome_classe: string;
+  data_hora_atualizacao?: string; // Campo de Materiais
+  codigo_do_grupo?: string;      // Campo de LsMateriais
+  nome_do_grupo?: string;        // Campo de LsMateriais
+  codigo_da_classe?: string;     // Campo de LsMateriais
+  nome_da_classe?: string;       // Campo de LsMateriais
+  codigo_do_pdm?: string;        // Campo de LsMateriais
+  nome_do_pdm?: string;          // Campo de LsMateriais
 }
 
-// Função para buscar todos os materiais
-async function getAllMateriais() {
+async function getAllLsMateriais() {
   try {
-    const response = await api.get(`/Materiais/getAll`); // Chamando o endpoint de "getAll"
-    
-    if (response.data) {
-      console.log("Resposta da API:", response.data);
-      return response.data; // Retornando todos os materiais
-    } else {
-      console.error("Nenhum dado de materiais encontrado.");
-      return [];
-    }
+    const response = await api.get(`/LsMateriais/getAll`);
+    return response.data || [];
   } catch (error) {
-    console.error("Erro ao buscar materiais:", error);
+    console.error("Erro ao buscar LsMateriais:", error);
     return [];
   }
 }
 
-// Hook para fazer a query de todos os materiais
+async function getAllMateriais() {
+  try {
+    const response = await api.get(`/Materiais/getAll`);
+    return response.data || [];
+  } catch (error) {
+    console.error("Erro ao buscar Materiais:", error);
+    return [];
+  }
+}
+
+
+export function useQueryGetAllLsMateriais() {
+  return useQuery({
+    queryKey: ["LsMateriais"],
+    queryFn: getAllLsMateriais,
+  });
+}
+
 export function useQueryGetAllMateriais() {
   return useQuery({
     queryKey: ["Materiais"],
-    queryFn: getAllMateriais, // Faz a query de todos os materiais
+    queryFn: getAllMateriais,
   });
 }
